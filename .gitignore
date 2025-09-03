@@ -1,0 +1,22 @@
+# Node
+node_modules/
+npm-debug.log
+yarn-error.log
+
+# Hardhat artifacts
+artifacts/
+cache/
+
+# Environment
+.env
+.env.local
+.env.*.local
+
+# Frontend builds
+.next/
+out/
+dist/
+
+# System
+.DS_Store
+Thumbs.db
