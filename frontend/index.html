@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+   <meta charset="UTF-8" />
+   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+   <title>ToDo DApp</title>
+   <link rel="stylesheet" href="style.css" />
+   <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js"></script>
+</head>
+
+<body>
+   <div class="app-container">
+
+      <!-- HEADER -->
+      <header class="app-header">
+         <h1>✅ ToDo DApp</h1>
+         <button id="connectWalletButton">🔗 Connect Wallet</button>
+      </header>
+      <p id="walletAddress" class="wallet-address"></p>
+
+      <!-- ADD TASK -->
+      <section class="add-task-container">
+         <input type="text" id="taskInput" placeholder="What task do you want to add?" />
+         <button id="addTaskButton">Add</button>
+      </section>
+
+      <!-- TASK LIST -->
+      <ul id="taskList" class="task-list">
+         <li class="task-item">
+            <div>
+               <input type="checkbox" />
+               <span class="task-text">Buy bread</span>
+            </div>
+            <button class="delete-button">X</button>
+         </li>
+
+         <li class="task-item completed">
+            <div>
+               <input type="checkbox" checked />
+               <span class="task-text">Study Solidity</span>
+            </div>
+            <button class="delete-button">X</button>
+         </li>
+
+         <li class="task-item">
+            <div>
+               <input type="checkbox" />
+               <span class="task-text">Go to the gym</span>
+            </div>
+            <button class="delete-button">X</button>
+         </li>
+      </ul>
+
+      <!-- FOOTER -->
+      <footer class="app-footer">
+         <a href="https://etherscan.io" target="_blank">Etherscan</a> |
+         <a href="#">Docs</a>
+      </footer>
+   </div>
+
+   <script src="app.js"></script>
+</body>
+
+</html>
