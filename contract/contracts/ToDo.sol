@@ -6,16 +6,14 @@ contract ToDo {
     struct Task {
         uint256 taskId;
         string taskName;
-        string taskDescription;
         bool taskStatus;
         address owner;
     }
 
-    // returns only essential data for function getTasks()
+    // returns only essential data for functio getTasks()
     struct TaskView {
         uint256 taskId;
         string taskName;
-        string taskDescription;
         bool taskStatus;
     }
 
@@ -35,14 +33,9 @@ contract ToDo {
         owner = msg.sender;
     }
 
-    function createTask(
-        string memory _taskName,
-        string memory _taskDescription
-    ) external {
+    function createTask(string memory _taskName) external {
         uint256 taskId = tasks[msg.sender].length;
-        tasks[msg.sender].push(
-            Task(taskId, _taskName, _taskDescription, false, msg.sender)
-        );
+        tasks[msg.sender].push(Task(taskId, _taskName, false, msg.sender));
 
         emit TaskCreated(msg.sender, taskId, _taskName, false);
     }
@@ -81,12 +74,7 @@ contract ToDo {
         for (uint i = 0; i < userTasks.length; i++) {
             if (!filterByStatus || userTasks[i].taskStatus == status) {
                 Task storage t = userTasks[i];
-                result[index++] = TaskView(
-                    t.taskId,
-                    t.taskName,
-                    t.taskDescription,
-                    t.taskStatus
-                );
+                result[index++] = TaskView(t.taskId, t.taskName, t.taskStatus);
             }
         }
 
