@@ -1,5 +1,5 @@
-// SPDX-License-Identifier: MIT
-pragma solidity >=0.6.0 <0.9.0;
+// SPDX-License-Identifier: UNLICENSED
+pragma solidity ^0.8.28;
 pragma experimental ABIEncoderV2;
 
 contract ToDo {
@@ -7,6 +7,7 @@ contract ToDo {
         uint256 taskId;
         string taskName;
         bool taskStatus;
+        bool isDeleted;
         address owner;
     }
 
@@ -28,6 +29,7 @@ contract ToDo {
         bool taskStatus
     );
     event TaskToggled(address indexed user, uint256 taskId, bool taskStatus);
+    event TaskDeleted(address indexed user, uint256 taskId);
 
     constructor() {
         owner = msg.sender;
@@ -35,9 +37,16 @@ contract ToDo {
 
     function createTask(string memory _taskName) external {
         uint256 taskId = tasks[msg.sender].length;
-        tasks[msg.sender].push(Task(taskId, _taskName, false, msg.sender));
+        tasks[msg.sender].push(Task(taskId, _taskName, false, false, msg.sender));
 
         emit TaskCreated(msg.sender, taskId, _taskName, false);
+    }
+
+    function deleteTask(uint256 _taskId) external {
+        require(_taskId<tasks[msg.sender].length, "This task does not exist");
+
+        tasks[msg.sender][_taskId].isDeleted = true;
+        emit TaskDeleted(msg.sender, _taskId);
     }
 
     function toggleTask(uint256 _taskId) external {
@@ -62,7 +71,7 @@ contract ToDo {
 
         // count returned tasks
         for (uint i = 0; i < userTasks.length; i++) {
-            if (!filterByStatus || userTasks[i].taskStatus == status) {
+            if ((!filterByStatus || userTasks[i].taskStatus == status) && userTasks[i].isDeleted == false) {
                 taskCount++;
             }
         }
@@ -72,7 +81,7 @@ contract ToDo {
         uint index = 0;
 
         for (uint i = 0; i < userTasks.length; i++) {
-            if (!filterByStatus || userTasks[i].taskStatus == status) {
+            if ((!filterByStatus || userTasks[i].taskStatus == status) && userTasks[i].isDeleted == false) {
                 Task storage t = userTasks[i];
                 result[index++] = TaskView(t.taskId, t.taskName, t.taskStatus);
             }
@@ -81,3 +90,4 @@ contract ToDo {
         return result;
     }
 }
+

@@ -1,5 +1,5 @@
 // get contract address and ABI
-const contractAddress = "0xC67218EE32DEB14100BF2C8814dc5FD65B2BB4a7";
+const contractAddress = "0xc1766216C5db017676A24DC5FA63FCdBa74a5827";
 const contractABI = [
   {
     inputs: [
@@ -10,6 +10,19 @@ const contractABI = [
       },
     ],
     name: "createTask",
+    outputs: [],
+    stateMutability: "nonpayable",
+    type: "function",
+  },
+  {
+    inputs: [
+      {
+        internalType: "uint256",
+        name: "_taskId",
+        type: "uint256",
+      },
+    ],
+    name: "deleteTask",
     outputs: [],
     stateMutability: "nonpayable",
     type: "function",
@@ -48,6 +61,25 @@ const contractABI = [
       },
     ],
     name: "TaskCreated",
+    type: "event",
+  },
+  {
+    anonymous: false,
+    inputs: [
+      {
+        indexed: true,
+        internalType: "address",
+        name: "user",
+        type: "address",
+      },
+      {
+        indexed: false,
+        internalType: "uint256",
+        name: "taskId",
+        type: "uint256",
+      },
+    ],
+    name: "TaskDeleted",
     type: "event",
   },
   {
@@ -131,11 +163,6 @@ const contractABI = [
   },
 ];
 
-// está apenas a renderizar as tasks quando dou add de uma task nova
-// mensagem de wallet connected tem que estar centrada
-// tem que renderizar primeiro as tasks que estão disponiveis
-// e exclui a mensagem se tiver tasks
-
 document.addEventListener("DOMContentLoaded", () => {
   // get references of html elements
   // buttons and text
@@ -177,6 +204,13 @@ document.addEventListener("DOMContentLoaded", () => {
           contractABI,
           signer
         );
+
+        // load tasks after connect wallet
+        const rawTasks = await todoContract.getTasks(false, false);
+        const tasks = Array.from(rawTasks); // or [...rawTasks]
+
+        console.log("Tasks recebidas do contrato:", tasks);
+        renderTasks(tasks);
       } catch (error) {
         // Handles errors if the user rejects the connection
         console.error("Error connecting wallets", error);
@@ -189,26 +223,27 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   });
 
-  // get tasks from smart contract
+  // ======= Get tasks from Smart Contract =======
   function renderTasks(tasks) {
     // 1️⃣ Limpa a lista antes de redesenhar
     taskList.innerHTML = "";
 
-    // 2️⃣ Mostra ou esconde a mensagem de "no tasks"
-    if (tasks.length === 0) {
+    // 2️⃣ Show or hide tasks messages
+    if (!tasks || tasks.length === 0) {
+      console.log("DEBUG → Nenhuma task detectada");
       noTasksMessage.classList.remove("hidden");
-      return; // nada mais a fazer
-    } else {
-      noTasksMessage.classList.add("hidden");
+      return;
     }
 
-    // 3️⃣ Preenche a lista dinamicamente
+    noTasksMessage.classList.add("hidden");
+
+    // 3️⃣ Fill list dynamically
     tasks.forEach((task) => {
-      // cria <li> principal
+      // create main <li>
       const li = document.createElement("li");
       li.className = "task-item";
 
-      // cria div interna para checkbox + texto
+      // create div for text
       const div = document.createElement("div");
 
       const checkbox = document.createElement("input");
@@ -223,21 +258,29 @@ document.addEventListener("DOMContentLoaded", () => {
       div.appendChild(checkbox);
       div.appendChild(span);
 
-      // cria botão de delete
-      const deleteBtn = document.createElement("button");
-      deleteBtn.className = "delete-button";
-      deleteBtn.textContent = "X";
+      // create delete button
+      const deleteTaskButton = document.createElement("button");
+      deleteTaskButton.className = "delete-button";
+      deleteTaskButton.textContent = "X";
 
-      // adiciona div e botão ao <li>
+      // add div and button to <li>
       li.appendChild(div);
-      li.appendChild(deleteBtn);
+      li.appendChild(deleteTaskButton);
 
-      // adiciona o <li> à lista no HTML
+      // add <li> to HTML list
       taskList.appendChild(li);
 
-      // Opcional: adicionar listeners para toggle/delete aqui
-      // checkbox.addEventListener("change", () => toggleTask(task.taskId));
-      // deleteBtn.addEventListener("click", () => deleteTask(task.taskId));
+      // ======= Delete tasks from list =======
+      deleteTaskButton.addEventListener("click", async () => {
+        // call deleteTask function()
+        const tx = await todoContract.deleteTask(task.taskId);
+        // wait for transaction
+        await tx.wait();
+
+        // get updated tasks
+        const tasks = await todoContract.getTasks(false, false);
+        renderTasks(tasks);
+      });
     });
   }
 
@@ -251,7 +294,8 @@ document.addEventListener("DOMContentLoaded", () => {
       await tx.wait();
 
       const tasks = await todoContract.getTasks(false, false);
-      renderTasks(tasks); // função que redesenha a lista
+      renderTasks(tasks); // put tasks again in the list
+      taskInput.value = ""; // clean input
     } catch (err) {
       console.error("Error adding task:", err);
     }

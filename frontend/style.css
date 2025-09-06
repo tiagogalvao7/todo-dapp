@@ -29,8 +29,20 @@ body {
   align-items: center;
 }
 
+#walletAddress {
+  text-align: center;
+  display: block;
+  width: 100%;
+  margin-top: 10px;
+  font-weight: bold;
+}
+
 .app-header h1 {
   margin: 0;
+}
+
+.hidden {
+  display: none;
 }
 
 #connectWalletButton {
